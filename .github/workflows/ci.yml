@@ -1,35 +1,61 @@
-- name: Build Docker Images
-  run: |
-    docker build -t tp-backend ./backend
-    docker build -t tp-frontend ./frontend
-    # pas besoin de tp-db si MySQL est standard
-    # docker build -t tp-db ./database
+name: CI - Build & Test
 
-- name: Start services
-  run: docker-compose up -d
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
-- name: Wait for backend
-  run: |
-    echo "Attente du backend (max 60 s)..."
-    for i in {1..30}; do
-      if curl -f http://localhost:3000/api >/dev/null 2>&1; then
-        echo "Backend est prêt !"
-        break
-      fi
-      echo "En attente... ($i/30)"
-      sleep 2
-    done
-    if [ $i -eq 30 ]; then
-      echo "Timeout : backend non démarré"
-      exit 1
-    fi
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
 
-- name: Test API Endpoint
-  run: curl -f http://localhost:3000/api
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-- name: Test DB Endpoint
-  run: curl -f http://localhost:3000/users
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-- name: Show logs on failure
-  if: failure()
-  run: docker-compose logs backend mysql
+      - name: Install docker-compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+      - name: Build Docker Images
+        run: |
+          docker build -t tp-backend ./backend
+          docker build -t tp-frontend ./frontend
+          docker build -t tp-db ./database  # Assurez-vous que le Dockerfile MySQL n'a pas de COPY my.cnf
+
+      - name: Start services
+        run: |
+          docker-compose up -d
+
+      - name: Wait for backend
+        run: |
+          echo "Attente du backend (max 60s)..."
+          for i in {1..30}; do
+            if curl -f http://localhost:3000/ >/dev/null 2>&1; then
+              echo "Backend est prêt !"
+              break
+            fi
+            echo "En attente... ($i/30)"
+            sleep 2
+          done
+          if [ $i -eq 30 ]; then
+            echo "Timeout : backend non démarré"
+            exit 1
+          fi
+
+      - name: Test API Endpoint
+        run: |
+          echo "Test de /users"
+          curl -f http://localhost:3000/users
+
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          echo "Logs des conteneurs :"
+          docker-compose logs
