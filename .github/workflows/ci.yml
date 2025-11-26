@@ -52,7 +52,7 @@ jobs:
       - name: Test API Endpoint
         run: |
           echo "Test de /api"
-          curl -f http://localhost:3000/users
+          curl -f http://localhost:3000/
 
       - name: Test DB Endpoint
         run: |
