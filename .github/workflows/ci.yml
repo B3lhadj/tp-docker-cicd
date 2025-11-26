@@ -37,7 +37,7 @@ jobs:
         run: |
           echo "Attente du backend (max 60 s)..."
           for i in {1..30}; do
-            if curl -f http://localhost:3000/api >/dev/null 2>&1; then
+            if curl -f http://localhost:3000/users >/dev/null 2>&1; then
               echo "Backend est prêt !"
               break
             fi
@@ -52,12 +52,12 @@ jobs:
       - name: Test API Endpoint
         run: |
           echo "Test de /api"
-          curl -f http://localhost:3000/api
+          curl -f http://localhost:3000/users
 
       - name: Test DB Endpoint
         run: |
           echo "Test de /db"
-          curl -f http://localhost:3000/db
+          curl -f http://localhost:3000/users
 
       - name: Show logs on failure
         if: failure()
