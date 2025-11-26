@@ -27,7 +27,7 @@ jobs:
         run: |
           docker build -t tp-backend ./backend
           docker build -t tp-frontend ./frontend
-          docker build -t tp-db ./database  # Assurez-vous que le Dockerfile MySQL n'a pas de COPY my.cnf
+          docker build -t tp-db ./database
 
       - name: Start services
         run: |
@@ -35,9 +35,9 @@ jobs:
 
       - name: Wait for backend
         run: |
-          echo "Attente du backend (max 60s)..."
+          echo "Attente du backend (max 60 s)..."
           for i in {1..30}; do
-            if curl -f http://localhost:3000/ >/dev/null 2>&1; then
+            if curl -f http://localhost:3000/api >/dev/null 2>&1; then
               echo "Backend est prêt !"
               break
             fi
@@ -51,8 +51,13 @@ jobs:
 
       - name: Test API Endpoint
         run: |
-          echo "Test de /users"
-          curl -f http://localhost:3000/users
+          echo "Test de /api"
+          curl -f http://localhost:3000/api
+
+      - name: Test DB Endpoint
+        run: |
+          echo "Test de /db"
+          curl -f http://localhost:3000/db
 
       - name: Show logs on failure
         if: failure()
