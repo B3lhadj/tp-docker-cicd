@@ -35,7 +35,7 @@ jobs:
 
       - name: Wait for backend
         run: |
-          echo "Attente du backend (max 60s)..."
+          echo "Attente du backend (max 60 s)..."
           for i in {1..30}; do
             if curl -f http://localhost:3000/api > /dev/null 2>&1; then
               echo "Backend est prêt !"
