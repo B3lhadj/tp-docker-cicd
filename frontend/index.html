@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Docker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Gestion des Utilisateurs</h1>
+        
+        <!-- Form to input Name and Surname -->
+        <form id="userForm">
+            <div>
+                <label for="firstName">Prénom:</label>
+                <input type="text" id="firstName" name="firstName" required>
+            </div>
+            <div>
+                <label for="lastName">Nom:</label>
+                <input type="text" id="lastName" name="lastName" required>
+            </div>
+            
+            <button type="submit">Ajouter</button>
+        </form>
+
+        <!-- Button to display list of added users -->
+        <button id="showListButton">Afficher Liste</button>
+
+        <div id="userList">
+            <h2>Liste des Utilisateurs</h2>
+            <ul id="userListContainer"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Add User to the database via backend
+        document.getElementById('userForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent page reload
+
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+
+            try {
+                const response = await fetch('http://localhost:3000/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ firstName, lastName })
+                });
+                if (response.ok) {
+                    alert('Utilisateur ajouté!');
+                    document.getElementById('firstName').value = '';
+                    document.getElementById('lastName').value = '';
+                } else {
+                    const error = await response.json();
+                    alert(`Erreur: ${error.error}`);
+                }
+            } catch (err) {
+                alert('Erreur de connexion au serveur');
+                console.error('Error:', err);
+            }
+        });
+
+        // Fetch and display the list of users
+        document.getElementById('showListButton').addEventListener('click', async function() {
+            const userListContainer = document.getElementById('userListContainer');
+            userListContainer.innerHTML = ''; // Clear the current list
+
+            try {
+                const response = await fetch('http://localhost:3000/users');
+                if (response.ok) {
+                    const users = await response.json();
+                    if (users.length === 0) {
+                        userListContainer.innerHTML = '<li>Aucun utilisateur ajouté</li>';
+                    } else {
+                        users.forEach(user => {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = `${user.first_name} ${user.last_name}`;
+                            userListContainer.appendChild(listItem);
+                        });
+                    }
+                } else {
+                    userListContainer.innerHTML = '<li>Erreur lors de la récupération des utilisateurs</li>';
+                }
+            } catch (err) {
+                userListContainer.innerHTML = '<li>Erreur de connexion au serveur</li>';
+                console.error('Error:', err);
+            }
+        });
+    </script>
+</body>
+</html>
