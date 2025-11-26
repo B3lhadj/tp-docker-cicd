@@ -60,7 +60,7 @@ app.get('/users', async (req, res) => {
         res.json(rows);
     } catch (err) {
         console.error('Error fetching users:', err.message);
-        res.status(500).json({ error: 'Failed to fetch users' });
+        res.status(500).json({ error: 'Failed to fetchdd users' });
     }
 });
 
