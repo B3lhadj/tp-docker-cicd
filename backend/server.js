@@ -49,7 +49,7 @@ app.post('/users', async (req, res) => {
         res.status(201).json({ id: result.insertId, firstName, lastName });
     } catch (err) {
         console.error('Error adding user:', err.message);
-        res.status(500).json({ error: 'Failed to add user' });
+        res.status(500).json({ error: 'Failed to add user222' });
     }
 });
 
